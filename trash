@@ -1,0 +1,59 @@
+#!/bin/bash
+# First, create ~/.trash as the Recycle Bin in linux
+# This script is for managing the Recycle Bin
+
+# List ~/.trash
+list_trash() {
+    ls -Alh ~/.trash |
+    sed -n '2,$p' |
+    awk 'BEGIN                                                                            \
+        {                                                                                 \
+            printf("   |  Size  |     File Name\n---|--------|--------------------------\n"); \
+            i=0;                                                                          \
+        }                                                                                 \
+        {                                                                                 \
+            ++i;                                                                          \
+            printf("%3s| %6s | %s\n",i,$5,$9);                                            \
+        }'
+    return
+}
+
+# Clear all files in ~/.trash
+clear_trash() {
+    echo "Will clear all files in ~/.trash!!!"
+    read -p "Are you sure?[Y/N] > "
+
+    case $REPLY in
+        Y|y)    rm -r ~/.trash/*  2>/dev/null
+                rm -r ~/.trash/.* 2>/dev/null
+                ;;
+    esac
+    return
+}
+
+# Show help
+usage() {
+    echo "Usage: trash (file... | -l | -c)"
+    return
+}
+
+case $1 in
+    -l | --list)    list_trash
+                    exit
+                    ;;
+    -c | --clear)   clear_trash
+                    exit
+                    ;;
+    -* | --help)    usage
+                    exit
+                    ;;
+esac
+
+while [ -n "$1" ]; do
+    if [ -e "$1" ]; then
+        mv $1 ~/.trash/"$(basename "$1")""$(date +_%m.%d-%H:%M:%S)"
+    else
+        echo "file '$1' don't exist!!!"
+    fi
+    shift
+done
