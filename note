@@ -1,0 +1,35 @@
+#!/bin/bash
+# Note something on ~/.note/notefile
+
+mkdir -p ~/.note/
+file=~/.note/notefile
+touch $file
+
+if (( 0 == $# ))
+then
+    cat $file | nl -w 3
+else
+    case $1 in
+        -e | -v | --vimedit)    vim  $file
+                                exit
+                                ;;
+        -d | --delete)          sed -n "$2p" $file
+                                sed -i "$2d" $file
+                                exit
+                                ;;
+        -c | --clear)           rm  $file
+                                exit
+                                ;;
+        -* | --help)            echo "Usage: note (notes... | -[e|v] | -d | -c)"
+                                exit
+                                ;;
+        *)                      while (( 0 != $# ))
+                                do
+                                    echo -n "$1 " >> $file
+                                    shift
+                                done
+                                echo >> $file
+                                exit
+                                ;;
+    esac
+fi
